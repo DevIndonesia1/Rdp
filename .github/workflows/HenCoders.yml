@@ -3,7 +3,7 @@ name: HenWindows 2022
 on: workflow_dispatch
 
 jobs:
-  build:
+  setup:
     runs-on: windows-2022
     timeout-minutes: 9999
 
@@ -32,12 +32,14 @@ jobs:
         bcdedit /set testsigning off
     - name: Restart System
       run: |
-        Restart-Computer -Force
-      shell: powershell
-      continue-on-error: true
-    - name: Wait for System Restart
-      run: |
-        timeout /t 300
+        shutdown /r /t 0
+
+  configure:
+    runs-on: windows-2022
+    timeout-minutes: 9999
+    needs: setup  # Menunggu job 'setup' selesai
+
+    steps:
     - name: Enabling access to RDP
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
