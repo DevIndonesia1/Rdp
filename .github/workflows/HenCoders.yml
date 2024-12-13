@@ -3,7 +3,7 @@ name: HenWindows 2022
 on: workflow_dispatch
 
 jobs:
-  setup:
+  build:
     runs-on: windows-2022
     timeout-minutes: 9999
 
@@ -27,19 +27,11 @@ jobs:
     - name: Change PC Name
       run: |
         Rename-Computer -NewName "HenCoders-PC" -Force
+        echo "PC name changed to HenCoders-PC. Please restart manually to apply changes."
     - name: Disable Test Mode
       run: |
         bcdedit /set testsigning off
-    - name: Restart System
-      run: |
-        shutdown /r /t 0
-
-  configure:
-    runs-on: windows-2022
-    timeout-minutes: 9999
-    needs: setup  # Menunggu job 'setup' selesai
-
-    steps:
+        echo "Test mode disabled. Please restart manually to apply changes."
     - name: Enabling access to RDP
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
