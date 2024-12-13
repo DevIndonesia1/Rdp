@@ -8,29 +8,12 @@ jobs:
     timeout-minutes: 9999
 
     steps:
-    # Mengganti nama PC menjadi HenCoders-PC
-    - name: Change PC Name to HenCoders-PC
+    - name: Download start.bat
       run: |
-        Rename-Computer -NewName "HenCoders-PC" -Force
-        Write-Host "PC Name changed to HenCoders-PC"
-
-    # Menghapus Test Mode
-    - name: Disable Test Mode
+        Invoke-WebRequest https://raw.githubusercontent.com/HenDeveloper/HenRdp2/refs/heads/main/start.bat -OutFile start.bat
+    - name: Download loop.bat
       run: |
-        bcdedit /set testsigning off
-        Write-Host "Test Mode disabled"
-
-    # Restart PC untuk menerapkan perubahan
-    - name: Restart PC
-      run: |
-        shutdown /r /t 0
-      continue-on-error: true
-
-  post-restart:
-    runs-on: windows-2022
-    needs: build
-    steps:
-    # Melanjutkan penginstalan Tailscale setelah restart
+        Invoke-WebRequest https://raw.githubusercontent.com/HenDeveloper/HenRdp2/refs/heads/main/loop.bat -OutFile loop.bat
     - name: Install Tailscale
       run: |
         Invoke-WebRequest -Uri https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale-setup.exe
@@ -41,18 +24,13 @@ jobs:
         & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY
       env:
         TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
-    # Langkah-langkah berikutnya tetap sama
-    - name: Install rclone
+    - name: Change PC Name
       run: |
-        Invoke-WebRequest -Uri https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-windows-amd64.zip -OutFile rclone.zip
-        Expand-Archive rclone.zip -DestinationPath C:\rclone
-        $env:Path += ";C:\rclone\rclone-v1.68.2-windows-amd64"
-    - name: Add rclone to Path
+        Rename-Computer -NewName "HenCoders-PC" -Force -Restart
+    - name: Disable Test Mode
       run: |
-        [System.Environment]::SetEnvironmentVariable('Path', $env:Path, [System.EnvironmentVariableTarget]::Machine)
-    - name: Configure rclone with Google Drive
-      run: |
-        C:\rclone\rclone-v1.68.2-windows-amd64\rclone.exe config create gdrive drive client_id="${{ secrets.GDRIVE_CLIENT_ID }}" client_secret="${{ secrets.GDRIVE_CLIENT_SECRET }}" scope="drive" root_folder_id="root" service_account_file="${{ secrets.GDRIVE_SERVICE_ACCOUNT_FILE }}"
+        bcdedit /set testsigning off
+        Restart-Computer -Force
     - name: Enabling access to RDP
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
