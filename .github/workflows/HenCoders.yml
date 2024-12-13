@@ -26,11 +26,18 @@ jobs:
         TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
     - name: Change PC Name
       run: |
-        Rename-Computer -NewName "HenCoders-PC" -Force -Restart
+        Rename-Computer -NewName "HenCoders-PC" -Force
     - name: Disable Test Mode
       run: |
         bcdedit /set testsigning off
+    - name: Restart System
+      run: |
         Restart-Computer -Force
+      shell: powershell
+      continue-on-error: true
+    - name: Wait for System Restart
+      run: |
+        timeout /t 300
     - name: Enabling access to RDP
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
