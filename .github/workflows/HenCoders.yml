@@ -1,0 +1,64 @@
+name: HenWindows 2022
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 9999
+
+    steps:
+    # Mengganti nama PC menjadi HenCoders-PC
+    - name: Change PC Name to HenCoders-PC
+      run: |
+        Rename-Computer -NewName "HenCoders-PC" -Force
+        Write-Host "PC Name changed to HenCoders-PC"
+
+    # Menghapus Test Mode
+    - name: Disable Test Mode
+      run: |
+        bcdedit /set testsigning off
+        Write-Host "Test Mode disabled"
+
+    # Restart PC untuk menerapkan perubahan
+    - name: Restart PC
+      run: |
+        shutdown /r /t 0
+      continue-on-error: true
+
+  post-restart:
+    runs-on: windows-2022
+    needs: build
+    steps:
+    # Melanjutkan penginstalan Tailscale setelah restart
+    - name: Install Tailscale
+      run: |
+        Invoke-WebRequest -Uri https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale-setup.exe
+        Start-Process tailscale-setup.exe -ArgumentList "/quiet", "/norestart" -Wait
+        $env:Path += ";C:\Program Files\Tailscale"
+    - name: Authenticate Tailscale
+      run: |
+        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY
+      env:
+        TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+    # Langkah-langkah berikutnya tetap sama
+    - name: Install rclone
+      run: |
+        Invoke-WebRequest -Uri https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-windows-amd64.zip -OutFile rclone.zip
+        Expand-Archive rclone.zip -DestinationPath C:\rclone
+        $env:Path += ";C:\rclone\rclone-v1.68.2-windows-amd64"
+    - name: Add rclone to Path
+      run: |
+        [System.Environment]::SetEnvironmentVariable('Path', $env:Path, [System.EnvironmentVariableTarget]::Machine)
+    - name: Configure rclone with Google Drive
+      run: |
+        C:\rclone\rclone-v1.68.2-windows-amd64\rclone.exe config create gdrive drive client_id="${{ secrets.GDRIVE_CLIENT_ID }}" client_secret="${{ secrets.GDRIVE_CLIENT_SECRET }}" scope="drive" root_folder_id="root" service_account_file="${{ secrets.GDRIVE_SERVICE_ACCOUNT_FILE }}"
+    - name: Enabling access to RDP
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+    - name: Start RDP session
+      run: cmd /c start.bat
+    - name: Successfully made! You can close the tab now.
+      run: cmd /c loop.bat
