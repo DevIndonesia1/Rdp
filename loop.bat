@@ -22,7 +22,7 @@ set /a counter+=1
 :: Jika waktu mencapai batas (30 hari), keluar dari loop
 if %counter% GEQ %max_time% (
     echo Maksimum waktu tercapai. Keluar dari loop.
-    exit
+    exit /b
 )
 
 :: Menunggu 60 detik sebelum melanjutkan iterasi berikutnya
