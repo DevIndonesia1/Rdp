@@ -1,102 +1,47 @@
-name: HenCoders Workflow
+name: HenWindows 2022
 
 on: workflow_dispatch
 
 jobs:
-  setup:
+  build:
     runs-on: windows-2022
     timeout-minutes: 9999
 
     steps:
-      - name: Install Tailscale
-        run: |
-          Invoke-WebRequest -Uri https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale-setup.exe
-          Start-Process tailscale-setup.exe -ArgumentList "/quiet", "/norestart" -Wait
-          $env:Path += ";C:\Program Files\Tailscale"
-
-      - name: Authenticate Tailscale
-        run: |
-          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY
-        env:
-          TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
-
-      - name: Install Steam
-        run: |
-          Invoke-WebRequest -Uri https://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe -OutFile SteamSetup.exe
-          Start-Process SteamSetup.exe -ArgumentList "/S" -Wait
-
-      - name: Install Epic Games Launcher
-        run: |
-          Invoke-WebRequest -Uri https://dl18.nesabamedia.net/windows/epicgameslauncher/EpicGamesLauncher.13.0.0.NesabaMedia.msi -OutFile EpicInstaller.msi
-          Start-Process msiexec.exe -ArgumentList "/i", "EpicInstaller.msi", "/quiet", "/norestart" -Wait
-
-      - name: Update Epic Games Launcher (if installed)
-        run: |
-          $epicGamesPath = "C:\Program Files\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe"
-          if (Test-Path $epicGamesPath) {
-            Write-Host "Epic Games Launcher is already installed. Checking for updates..."
-            Start-Process $epicGamesPath -ArgumentList "-update" -Wait
-            echo "Epic Games Launcher updated."
-          } else {
-            echo "Epic Games Launcher is not installed. Skipping update."
-            }
-
-      - name: Set Chrome as Default Browser and Uninstall Edge/Firefox
-        run: |
-          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice" -Name "Progid" -Value "ChromeHTML"
-          Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice" -Name "Progid" -Value "ChromeHTML"
-          Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name = 'Microsoft Edge'" | ForEach-Object { $_.Uninstall() }
-          Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name = 'Mozilla Firefox'" | ForEach-Object { $_.Uninstall() }
-          echo "Microsoft Edge and Firefox uninstalled."
-
-      - name: Hide Unity Hub and R 4.4.2 Icons
-        run: |
-          $unityHubPath = "C:\Users\Public\Desktop\Unity Hub.lnk"
-          if (Test-Path $unityHubPath) {
-            Rename-Item -Path $unityHubPath -NewName "Unity Hub - Hidden.lnk"
-            echo "Unity Hub icon hidden."
-          }
-          $rPath = "C:\Users\Public\Desktop\R 4.4.2.lnk"
-          if (Test-Path $rPath) {
-            Rename-Item -Path $rPath -NewName "R 4.4.2 - Hidden.lnk"
-            echo "R 4.4.2 icon hidden."
-          }
-
-      - name: Set Copyright Message in RDP
-        run: |
-          Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticecaption" -Value "© Copyright HenCoders"
-          Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticetext" -Value "Welcome to the system. Please contact HenCoders for support."
-
-      - name: Clean Disk D
-        run: |
-          Remove-Item -Path "D:\*" -Recurse -Force -ErrorAction SilentlyContinue
-          echo "Disk D cleaned."
-
-      - name: Rename Disk D to HenCoders
-        run: |
-          Get-Volume -DriveLetter D | Set-Volume -NewFileSystemLabel "HenCoders"
-          echo "Disk D renamed to HenCoders."
-
-      - name: Download and Install Start.bat
-        run: |
-          Invoke-WebRequest https://raw.githubusercontent.com/DevIndonesia1/Rdp/refs/heads/main/start.bat -OutFile start.bat
-          echo "start.bat installed."
-
-      - name: Start RDP session
-        run: |
-          cmd.exe /c start.bat
-          echo "RDP session started."
-
-      - name: Download and Install Loop.bat
-        run: |
-          Invoke-WebRequest https://raw.githubusercontent.com/DevIndonesia1/Rdp/refs/heads/main/loop.bat -OutFile loop.bat
-          echo "loop.bat installed."
-
-      - name: Run Loop.bat
-        run: |
-          cmd.exe /c loop.bat
-          echo "Loop.bat executed."
-
-      - name: Installation Complete
-        run: |
-          echo "Installation is complete. You can now access RDP."
+    - name: Download start.bat
+      run: |
+        Invoke-WebRequest https://raw.githubusercontent.com/HenDeveloper/HenRdp2/refs/heads/main/start.bat -OutFile start.bat
+    - name: Download loop.bat
+      run: |
+        Invoke-WebRequest https://raw.githubusercontent.com/HenDeveloper/HenRdp2/refs/heads/main/loop.bat -OutFile loop.bat
+    - name: Install Tailscale
+      run: |
+        Invoke-WebRequest -Uri https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale-setup.exe
+        Start-Process tailscale-setup.exe -ArgumentList "/quiet", "/norestart" -Wait
+        $env:Path += ";C:\Program Files\Tailscale"
+    - name: Authenticate Tailscale
+      run: |
+        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY
+      env:
+        TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+    - name: Install rclone
+      run: |
+        Invoke-WebRequest -Uri https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-windows-amd64.zip -OutFile rclone.zip
+        Expand-Archive rclone.zip -DestinationPath C:\rclone
+        $env:Path += ";C:\rclone\rclone-v1.68.2-windows-amd64"
+    - name: Add rclone to Path
+      run: |
+        [System.Environment]::SetEnvironmentVariable('Path', $env:Path, [System.EnvironmentVariableTarget]::Machine)
+    - name: Configure rclone with Google Drive
+      run: |
+        C:\rclone\rclone-v1.68.2-windows-amd64\rclone.exe config create gdrive drive client_id="${{ secrets.GDRIVE_CLIENT_ID }}" client_secret="${{ secrets.GDRIVE_CLIENT_SECRET }}" scope="drive" root_folder_id="root" service_account_file="${{ secrets.GDRIVE_SERVICE_ACCOUNT_FILE }}"
+    - name: Enabling access to RDP
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+    - name: Start RDP session
+      run: cmd /c start.bat
+    - name: Successfully made! You can close the tab now.
+      run: cmd /c loop.bat
+      
