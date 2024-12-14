@@ -24,17 +24,6 @@ jobs:
         & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY
       env:
         TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
-    - name: Install rclone
-      run: |
-        Invoke-WebRequest -Uri https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-windows-amd64.zip -OutFile rclone.zip
-        Expand-Archive rclone.zip -DestinationPath C:\rclone
-        $env:Path += ";C:\rclone\rclone-v1.68.2-windows-amd64"
-    - name: Add rclone to Path
-      run: |
-        [System.Environment]::SetEnvironmentVariable('Path', $env:Path, [System.EnvironmentVariableTarget]::Machine)
-    - name: Configure rclone with Google Drive
-      run: |
-        C:\rclone\rclone-v1.68.2-windows-amd64\rclone.exe config create gdrive drive client_id="${{ secrets.GDRIVE_CLIENT_ID }}" client_secret="${{ secrets.GDRIVE_CLIENT_SECRET }}" scope="drive" root_folder_id="root" service_account_file="${{ secrets.GDRIVE_SERVICE_ACCOUNT_FILE }}"
     - name: Enabling access to RDP
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
