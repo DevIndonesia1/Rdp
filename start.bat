@@ -7,6 +7,7 @@ netsh interface tcp set global rss=enabled
 netsh interface tcp set global chimney=enabled
 netsh interface ipv4 set subinterface "Ethernet" mtu=1500 store=persistent
 
+del /f "C:\Users\Public\Desktop\Epic Games Launcher.lnk" > nul 2>&1
 net config server /srvcomment:"Windows Server 2022 by @HenRDP2024" > nul 2>&1
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /V EnableAutoTray /T REG_DWORD /D 0 /F > nul 2>&1
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /f /v Wallpaper /t REG_SZ /d D:\a\wallpaper.bat > nul 2>&1
