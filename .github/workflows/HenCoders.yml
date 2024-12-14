@@ -69,11 +69,26 @@ jobs:
           Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticecaption" -Value "© Copyright HenCoders"
           Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticetext" -Value "Welcome to the system. Please contact HenCoders for support."
 
-      - name: Clean Disk D
+      - name: Move Files from Disk D to Disk C
         run: |
-          # Menghapus semua file di disk D
-          Remove-Item -Path "D:\*" -Recurse -Force
-          echo "Disk D cleaned."
+          $sourceDir = "D:\"
+          $destinationDir = "C:\MovedFiles\"
+          
+          # Membuat folder tujuan jika belum ada
+          if (-not (Test-Path -Path $destinationDir)) {
+            New-Item -Path $destinationDir -ItemType Directory
+          }
+
+          # Memindahkan file yang tidak sedang digunakan
+          Get-ChildItem -Path $sourceDir -Recurse | Where-Object { $_.PSIsContainer -eq $false } | ForEach-Object {
+            try {
+              Move-Item $_.FullName -Destination $destinationDir -Force -ErrorAction Stop
+              echo "Moved: $_"
+            } catch {
+              echo "Failed to move: $_. Full error: $_"
+            }
+          }
+          echo "Files moved from D to C."
 
       - name: Rename Disk D to HenCoders
         run: |
