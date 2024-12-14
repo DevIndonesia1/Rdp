@@ -43,13 +43,6 @@ jobs:
             Start-Process msiexec.exe -ArgumentList "/i", "EpicInstaller.msi", "/quiet", "/norestart" -Wait
           }
 
-      - name: Optimize Network Speed
-        run: |
-          Set-NetTCPSetting -SettingName InternetCustom -MaxConnectionsPerServer 1000
-          Set-NetTCPSetting -SettingName InternetCustom -MaxConnectionsPerChildConnection 1000
-          Set-NetAdapterAdvancedProperty -Name "Ethernet" -DisplayName "Speed & Duplex" -DisplayValue "1.0 Gbps Full Duplex"
-          echo "Network speed optimized."
-
       - name: Set Chrome as Default Browser and Uninstall Edge/Firefox
         run: |
           Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice" -Name "Progid" -Value "ChromeHTML"
