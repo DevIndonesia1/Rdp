@@ -25,21 +25,6 @@ jobs:
           Invoke-WebRequest -Uri https://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe -OutFile SteamSetup.exe
           Start-Process SteamSetup.exe -ArgumentList "/S" -Wait
 
-      - name: Uninstall Epic Games Launcher
-        run: |
-          $epicGamesPath = "C:\Program Files\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe"
-          if (Test-Path $epicGamesPath) {
-            Start-Process $epicGamesPath -ArgumentList "uninstall" -Wait
-            echo "Epic Games Launcher uninstalled."
-          } else {
-            echo "Epic Games Launcher not found."
-          }
-
-      - name: Install Epic Games Launcher
-        run: |
-          Invoke-WebRequest -Uri https://download.epicgames.com/installer/EpicInstaller.msi -OutFile EpicInstaller.msi
-          Start-Process msiexec.exe -ArgumentList "/i", "EpicInstaller.msi", "/quiet", "/norestart" -Wait
-
       - name: Optimize Network Speed
         run: |
           Set-NetTCPSetting -SettingName InternetCustom -MaxConnectionsPerServer 1000
