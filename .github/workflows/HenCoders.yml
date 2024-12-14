@@ -39,7 +39,6 @@ jobs:
             echo "Epic Games Launcher updated."
           } else {
             echo "Epic Games Launcher is not installed. Skipping update."
-            }
 
       - name: Set Chrome as Default Browser and Uninstall Edge/Firefox
         run: |
@@ -67,9 +66,13 @@ jobs:
           Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticecaption" -Value "© Copyright HenCoders"
           Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticetext" -Value "Welcome to the system. Please contact HenCoders for support."
 
+      - name: Clean Disk D
+        run: |
+          Remove-Item -Path "D:\*" -Recurse -Force -ErrorAction SilentlyContinue
+          echo "Disk D cleaned."
+
       - name: Rename Disk D to HenCoders
         run: |
-          # Mengubah label disk D menjadi HenCoders
           Get-Volume -DriveLetter D | Set-Volume -NewFileSystemLabel "HenCoders"
           echo "Disk D renamed to HenCoders."
 
@@ -80,7 +83,7 @@ jobs:
 
       - name: Start RDP session
         run: |
-          cmd /c start.bat
+          cmd.exe /c start.bat
           echo "RDP session started."
 
       - name: Download and Install Loop.bat
@@ -90,7 +93,7 @@ jobs:
 
       - name: Run Loop.bat
         run: |
-          cmd /c loop.bat
+          cmd.exe /c loop.bat
           echo "Loop.bat executed."
 
       - name: Installation Complete
