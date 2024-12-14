@@ -38,10 +38,7 @@ jobs:
             Start-Process $epicGamesPath -ArgumentList "-update" -Wait
             echo "Epic Games Launcher updated."
           } else {
-            echo "Epic Games Launcher is not installed. Proceeding with installation."
-            Invoke-WebRequest -Uri https://dl18.nesabamedia.net/windows/epicgameslauncher/EpicGamesLauncher.13.0.0.NesabaMedia.msi -OutFile EpicInstaller.msi
-            Start-Process msiexec.exe -ArgumentList "/i", "EpicInstaller.msi", "/quiet", "/norestart" -Wait
-          }
+            echo "Epic Games Launcher is not installed. Skipping update."
 
       - name: Set Chrome as Default Browser and Uninstall Edge/Firefox
         run: |
@@ -69,26 +66,19 @@ jobs:
           Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticecaption" -Value "© Copyright HenCoders"
           Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticetext" -Value "Welcome to the system. Please contact HenCoders for support."
 
-      - name: Move Files from Disk D to Disk C
+      - name: Clean Disk D
         run: |
-          $sourceDir = "D:\"
-          $destinationDir = "C:\MovedFiles\"
-          
-          # Membuat folder tujuan jika belum ada
-          if (-not (Test-Path -Path $destinationDir)) {
-            New-Item -Path $destinationDir -ItemType Directory
+          # Memindahkan file dari Disk D ke Disk C sebelum pembersihan
+          $source = "D:\*"
+          $destination = "C:\BackupDiskD"
+          if (!(Test-Path -Path $destination)) {
+            New-Item -ItemType Directory -Path $destination
           }
-
-          # Memindahkan file yang tidak sedang digunakan
-          Get-ChildItem -Path $sourceDir -Recurse | Where-Object { $_.PSIsContainer -eq $false } | ForEach-Object {
-            try {
-              Move-Item $_.FullName -Destination $destinationDir -Force -ErrorAction Stop
-              echo "Moved: $_"
-            } catch {
-              echo "Failed to move: $_. Full error: $_"
-            }
-          }
-          echo "Files moved from D to C."
+          Get-ChildItem -Path $source | Move-Item -Destination $destination -Force
+          echo "File dari Disk D telah dipindahkan ke C:\BackupDiskD."
+          # Menghapus semua file di Disk D
+          Remove-Item -Path "D:\*" -Recurse -Force
+          echo "Disk D cleaned."
 
       - name: Rename Disk D to HenCoders
         run: |
@@ -98,10 +88,17 @@ jobs:
 
       - name: Create New Disk H
         run: |
-          # Membuat disk baru dengan huruf H
-          New-Partition -DiskNumber 0 -UseMaximumSize -AssignDriveLetter -DriveLetter H
-          Format-Volume -DriveLetter H -FileSystem NTFS -NewFileSystemLabel "Disk H" -Confirm:$false
-          echo "New disk H created and formatted."
+          # Periksa apakah ada ruang yang tidak teralokasikan di Disk 0
+          $disk = Get-Disk -Number 0
+          if ($disk.AllocatedSize -eq $disk.Size) {
+            Write-Host "Disk 0 tidak memiliki ruang yang tidak teralokasikan. Tidak dapat membuat partisi baru."
+          } else {
+            # Membuat partisi baru jika ada ruang tidak teralokasikan
+            $partition = New-Partition -DiskNumber 0 -UseMaximumSize -AssignDriveLetter -DriveLetter H
+            # Format partisi baru dengan NTFS
+            Format-Volume -DriveLetter H -FileSystem NTFS -NewFileSystemLabel "Disk H" -Confirm:$false
+            Write-Host "Disk H berhasil dibuat dan diformat."
+          }
 
       - name: Download and Install Start.bat
         run: |
