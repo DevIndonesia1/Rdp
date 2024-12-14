@@ -27,7 +27,7 @@ jobs:
 
       - name: Install Epic Games Launcher
         run: |
-          Invoke-WebRequest -Uri https://download.epicgames.com/installer/EpicInstaller.msi -OutFile EpicInstaller.msi
+          Invoke-WebRequest -Uri https://dl18.nesabamedia.net/windows/epicgameslauncher/EpicGamesLauncher.13.0.0.NesabaMedia.msi -OutFile EpicInstaller.msi
           Start-Process msiexec.exe -ArgumentList "/i", "EpicInstaller.msi", "/quiet", "/norestart" -Wait
 
       - name: Update Epic Games Launcher (if installed)
@@ -39,7 +39,7 @@ jobs:
             echo "Epic Games Launcher updated."
           } else {
             echo "Epic Games Launcher is not installed. Proceeding with installation."
-            Invoke-WebRequest -Uri https://download.epicgames.com/installer/EpicInstaller.msi -OutFile EpicInstaller.msi
+            Invoke-WebRequest -Uri https://dl18.nesabamedia.net/windows/epicgameslauncher/EpicGamesLauncher.13.0.0.NesabaMedia.msi -OutFile EpicInstaller.msi
             Start-Process msiexec.exe -ArgumentList "/i", "EpicInstaller.msi", "/quiet", "/norestart" -Wait
           }
 
