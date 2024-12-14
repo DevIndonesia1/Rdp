@@ -39,6 +39,7 @@ jobs:
             echo "Epic Games Launcher updated."
           } else {
             echo "Epic Games Launcher is not installed. Skipping update."
+            }
 
       - name: Set Chrome as Default Browser and Uninstall Edge/Firefox
         run: |
