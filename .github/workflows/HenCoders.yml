@@ -37,10 +37,6 @@ jobs:
       run: |
         Invoke-WebRequest -Uri https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe -OutFile SteamSetup.exe
         Start-Process SteamSetup.exe -ArgumentList "/S", "/D=D:\Steam" -Wait
-    - name: Install Rockstar Games Launcher
-      run: |
-        Invoke-WebRequest -Uri "https://gamedownloads.rockstargames.com/public/installer/Rockstar-Games-Launcher.exe?_gl=1*1fo7296*_gcl_au*MjM4NTI3MDA5LjE3MzQwMjIwNzU.*_ga*MTY3ODYyMTQ1Mi4xNzM0MDIwNTQ4*_ga_PJQ2JYZDQC*MTczNDIzNTY4NS41LjEuMTczNDIzNTcyNi4wLjAuMA.." -OutFile RockstarLauncherSetup.exe
-        Start-Process RockstarLauncherSetup.exe -ArgumentList "/S" -Wait
     - name: Install FiveM
       run: |
         Invoke-WebRequest -Uri https://s0.fivemods.app/download -OutFile FiveM_Setup.exe
