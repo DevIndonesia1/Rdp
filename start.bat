@@ -20,6 +20,18 @@ sc start audiosrv > nul 2>&1
 ICACLS C:\Windows\Temp /grant administrator:F > nul 2>&1
 ICACLS C:\Windows\installer /grant administrator:F > nul 2>&1
 
+:: Menghapus shortcut dari desktop
+del /f /q "%Public%\Desktop\R 4.4.2.lnk" > nul 2>&1
+del /f /q "%Public%\Desktop\Unity Hub.lnk" > nul 2>&1
+del /f /q "%Public%\Desktop\Firefox.lnk" > nul 2>&1
+del /f /q "%Public%\Desktop\Microsoft Edge.lnk" > nul 2>&1
+
+:: Menjadikan Google Chrome sebagai browser default
+if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" (
+    REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice" /v ProgId /t REG_SZ /d ChromeHTML /f > nul 2>&1
+    REG ADD "HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice" /v ProgId /t REG_SZ /d ChromeHTML /f > nul 2>&1
+)
+
 echo Successfully Installed, If the RDP is Dead, Please Rebuild Again!
 echo IP (Tailscale): 
 for /f "tokens=2 delims=:" %%i in ('%TAILSCALE_PATH% ip') do echo %%i
