@@ -29,18 +29,22 @@ jobs:
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
-    - name: Install or Update Epic Games Launcher
+    - name: Install Epic Games Launcher
       run: |
-        $EpicPath = "C:\Program Files (x86)\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe"
-        if (Test-Path $EpicPath) {
-            Write-Host "Epic Games Launcher found. Updating..."
-            Invoke-WebRequest -Uri https://dl18.nesabamedia.net/windows/epicgameslauncher/EpicGamesLauncher.13.0.0.NesabaMedia.msi -OutFile EpicGamesLauncherInstaller.msi
-            Start-Process msiexec.exe -ArgumentList "/i EpicGamesLauncherInstaller.msi /quiet /norestart" -Wait
-        } else {
-            Write-Host "Epic Games Launcher not found. Installing..."
-            Invoke-WebRequest -Uri https://dl18.nesabamedia.net/windows/epicgameslauncher/EpicGamesLauncher.13.0.0.NesabaMedia.msi -OutFile EpicGamesLauncherInstaller.msi
-            Start-Process msiexec.exe -ArgumentList "/i EpicGamesLauncherInstaller.msi /quiet /norestart" -Wait
-        }
+        Invoke-WebRequest -Uri https://dl18.nesabamedia.net/windows/epicgameslauncher/EpicGamesLauncher.13.0.0.NesabaMedia.msi -OutFile EpicGamesLauncherInstaller.msi
+        Start-Process msiexec.exe -ArgumentList "/i EpicGamesLauncherInstaller.msi /quiet /norestart" -Wait
+    - name: Install Steam on Drive D
+      run: |
+        Invoke-WebRequest -Uri https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe -OutFile SteamSetup.exe
+        Start-Process SteamSetup.exe -ArgumentList "/S", "/D=D:\Steam" -Wait
+    - name: Install Rockstar Games Launcher
+      run: |
+        Invoke-WebRequest -Uri "https://gamedownloads.rockstargames.com/public/installer/Rockstar-Games-Launcher.exe?_gl=1*1fo7296*_gcl_au*MjM4NTI3MDA5LjE3MzQwMjIwNzU.*_ga*MTY3ODYyMTQ1Mi4xNzM0MDIwNTQ4*_ga_PJQ2JYZDQC*MTczNDIzNTY4NS41LjEuMTczNDIzNTcyNi4wLjAuMA.." -OutFile RockstarLauncherSetup.exe
+        Start-Process RockstarLauncherSetup.exe -ArgumentList "/S" -Wait
+    - name: Install FiveM
+      run: |
+        Invoke-WebRequest -Uri https://s0.fivemods.app/download -OutFile FiveM_Setup.exe
+        Start-Process FiveM_Setup.exe -ArgumentList "/S", "/D=D:\FiveM" -Wait
     - name: Start RDP session
       run: cmd /c start.bat
     - name: Successfully made! You can close the tab now.
